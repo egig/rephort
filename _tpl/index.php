@@ -1,4 +1,4 @@
-<h1>Tasks Assigment Diagram</h1>
+<h1>Tasks Assignment Diagram</h1>
 
 <ul>
 	<li>Height of row indicates number of tasks.</li>
