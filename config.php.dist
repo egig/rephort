@@ -1,0 +1,7 @@
+<?php return [
+	
+	'debug' => TRUE,
+
+	'api_token' => '',
+	'libphutil_path' => '',
+];
