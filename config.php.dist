@@ -3,5 +3,6 @@
 	'debug' => TRUE,
 
 	'api_token' => '',
-	'libphutil_path' => '',
+	'libphutil_path' => __DIR__.'/path/to/libphutil',
+	'phabricator_url' => '',
 ];

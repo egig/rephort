@@ -1,30 +1,33 @@
+<h1>Tasks Assigment Diagram</h1>
+
+<ul>
+	<li>Height of row indicates number of tasks.</li>
+	<li> Different color of cells indicates different projects.</li>
+	<li> Click cells to go to the task.</li>
+</ul>
 
 <table border="1" style="border-collapse: collapse;">
 	<thead>
 		<tr>
-			<th rowspan="2">User (Jumlah tasks)</th>
+			<th rowspan="2">User</th>
 			<th colspan="<?= ($days+1) ?>"> <?php echo date('F Y') ?></th>
 		</tr>
 		<tr>
 			<?php foreach (range(1, $days) as $day): ?>
 				<th style="width:30px;"><?= $day ?></th>
 			<?php endforeach ?>
-		<th> Last Target </th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php foreach ($users as $user): ?>
 			<tr id="row-<?= $user['phid'] ?>">
-				<td>
+				<td valign="top" style="padding:5px 10px">
 					<img style="height:20px;" src="<?php echo $user['image'] ?>">
 					<?= $user['realName'] ?>
-					<span class="task-num"></span>
 				</td>
 				<?php foreach (range(1, $days) as $day): ?>
 					<td <?php if($day == date('j') ): ?> style="background:gray" <?php endif ?>  class="day-<?php echo mktime(0,0,0, date('n'), $day, date('Y')) ?>"></td>
 				<?php endforeach ?>
-				
-				<td class="last-target" id="last-target"></td>
 			</tr>
 		<?php endforeach ?>
 	</tbody>
@@ -73,7 +76,7 @@
 								}
 
 								$('#row-'+users[i].phid).find('.day-'+days[n])
-									.append('<a href="'+url+'"><div title="'+title+'" style="font-size:0.7em;width:30px;height:10px;background-color:'+bg+'"></div></a>');
+									.append('<a href="'+url+'"  target="_blank" ><div title="'+title+'" style="font-size:0.7em;width:30px;height:10px;background-color:'+bg+'"></div></a>');
 							}
 						}
 					}
