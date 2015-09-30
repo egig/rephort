@@ -16,52 +16,52 @@ $_escaper = new Escaper;
 $_template = new Template(__DIR__.'/_tpl', $_escaper);
 
 $app->get('/', function() use($app, $_client, $_template) {
-	
-	$data['base_path'] = $app['request']->getBaseUrl();
+    
+    $data['base_path'] = $app['request']->getBaseUrl();
 
-	$data['users'] = $_client->callMethodSynchronous('user.query', []);
-	$data['days'] = cal_days_in_month(CAL_GREGORIAN, date('n'), date('Y'));
-	return $_template->render('index', $data);
+    $data['users'] = $_client->callMethodSynchronous('user.query', []);
+    $data['days'] = cal_days_in_month(CAL_GREGORIAN, date('n'), date('Y'));
+    return $_template->render('index', $data);
 });
 
 $app->get('/api', function() use ($app, $_client) {
 
-	$users = $_client->callMethodSynchronous('user.query', []);
-	$colors = ['#80E680', '#4D4DFF', '#E066A3', '#DB4D4D', '#FF944D', '#A38566', '#FFFF66'];
+    $users = $_client->callMethodSynchronous('user.query', []);
+    $colors = ['#80E680', '#4D4DFF', '#E066A3', '#DB4D4D', '#FF944D', '#A38566', '#FFFF66'];
 
-	$projectColors = [];
-	
-	foreach ($users as &$user) {
-		$open_tasks  = $_client->callMethodSynchronous('maniphest.query', ['status' => 'status-open', 'ownerPHIDs' => [$user['phid']]]);
+    $projectColors = [];
+    
+    foreach ($users as &$user) {
+        $open_tasks  = $_client->callMethodSynchronous('maniphest.query', ['status' => 'status-open', 'ownerPHIDs' => [$user['phid']]]);
 
-		// filter target
-		$targeted_tasks = [];
-		foreach ($open_tasks as $phid  => $task) {
-			if($task['auxiliary']['std:maniphest:creasindo:target'] != null) {
+        // filter target
+        $targeted_tasks = [];
+        foreach ($open_tasks as $phid  => $task) {
+            if($task['auxiliary']['std:maniphest:creasindo:target'] != null) {
 
-				// group by projects
-				foreach ($task['projectPHIDs'] as $i => $projectPHID) {
+                // group by projects
+                foreach ($task['projectPHIDs'] as $i => $projectPHID) {
 
-					if(!isset($targeted_tasks[$projectPHID])) {
-						$targeted_tasks[$projectPHID] = [];
-					}
+                    if(!isset($targeted_tasks[$projectPHID])) {
+                        $targeted_tasks[$projectPHID] = [];
+                    }
 
-					$targeted_tasks[$projectPHID][] = $task;
+                    $targeted_tasks[$projectPHID][] = $task;
 
-					if(!isset($projectColors[$projectPHID])) {
-						$projectColors[$projectPHID] = array_shift($colors);
-					}
-				}
-			}
-		}
+                    if(!isset($projectColors[$projectPHID])) {
+                        $projectColors[$projectPHID] = array_shift($colors);
+                    }
+                }
+            }
+        }
 
-		$user['targeted_tasks'] = $targeted_tasks;
-	}
+        $user['targeted_tasks'] = $targeted_tasks;
+    }
 
-	$response['users'] = $users;
-	$response['projectColors'] = $projectColors;
+    $response['users'] = $users;
+    $response['projectColors'] = $projectColors;
 
-	return $app->json($response);
+    return $app->json($response);
 });
 
 $app->run(); 
