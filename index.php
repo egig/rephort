@@ -15,15 +15,27 @@ $_client->setConduitToken($app['api_token']);
 $_escaper = new Escaper;
 $_template = new Template(__DIR__.'/_tpl', $_escaper);
 
-$app->get('/', function() use($app, $_client, $_template) {
+/* HOME redirect to /{year}/{date} */
+$app->get('/',function() use ($app){
+
+    $url = $app['request']->getBaseUrl().'/'.date('Y').'/'.date('n');
+    return $app->redirect($url);
+});
+
+/* MAIN */
+$app->get('/{year}/{month}', function($year, $month) use($app, $_client, $_template) {
     
     $data['base_path'] = $app['request']->getBaseUrl();
 
+    $data['year'] = $year;
+    $data['month'] = $month;
+
     $data['users'] = $_client->callMethodSynchronous('user.query', []);
-    $data['days'] = cal_days_in_month(CAL_GREGORIAN, date('n'), date('Y'));
+    $data['days'] = cal_days_in_month(CAL_GREGORIAN, $month, $year);
     return $_template->render('index', $data);
 });
 
+/* API to get json data */
 $app->get('/api', function() use ($app, $_client) {
 
     $users = $_client->callMethodSynchronous('user.query', []);

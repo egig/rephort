@@ -36,7 +36,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2">User</th>
-                                <th colspan="<?= ($days+1) ?>"> <?php echo date('F Y') ?></th>
+                                <th colspan="<?= ($days+1) ?>"> <?php echo date('F Y', mktime(0,0,0, $month, 1, $year)) ?></th>
                             </tr>
                             <tr>
                                 <?php foreach (range(1, $days) as $day): ?>
@@ -47,12 +47,18 @@
                         <tbody>
                             <?php foreach ($users as $user): ?>
                                 <tr id="row-<?= $user['phid'] ?>">
-                                    <td valign="top" style="padding:5px 10px">
-                                        <img style="height:20px;" src="<?php echo $user['image'] ?>">
-                                        <?= $user['realName'] ?>
+                                    <td valign="top">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <img style="height:20px;" src="<?php echo $user['image'] ?>">
+                                            </div>
+                                            <div class="col-md-10">
+                                                <?= $user['realName'] ?>
+                                            </div>
+                                        </div>
                                     </td>
                                     <?php foreach (range(1, $days) as $day): ?>
-                                        <td <?php if($day == date('j') ): ?> style="background:#e1e1e1" <?php endif ?>  class="day day-<?php echo mktime(0,0,0, date('n'), $day, date('Y')) ?>"></td>
+                                        <td <?php if($day == date('j') ): ?> style="background:#e1e1e1" <?php endif ?>  class="day day-<?php echo mktime(0,0,0, $month, $day, $year) ?>"></td>
                                     <?php endforeach ?>
                                 </tr>
                             <?php endforeach ?>
@@ -71,7 +77,7 @@
 
             var days = [];
             <?php foreach (range(1, $days) as $day): ?>
-                days.push(<?= mktime(0,0,0, date('n'), $day, date('Y')) ?>);
+                days.push(<?= mktime(0,0,0, $month, $day, $year) ?>);
             <?php endforeach ?>
 
             App.init(baseUrl, days);
