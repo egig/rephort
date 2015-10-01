@@ -35,12 +35,12 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th rowspan="2">User</th>
+                                <th rowspan="2" class="user-col">User</th>
                                 <th colspan="<?= ($days+1) ?>"> <?php echo date('F Y', mktime(0,0,0, $month, 1, $year)) ?></th>
                             </tr>
                             <tr>
                                 <?php foreach (range(1, $days) as $day): ?>
-                                    <th style="width:30px;"><?= $day ?></th>
+                                    <th style="width:30px;"><?= str_pad($day, 2, '0', STR_PAD_LEFT) ?></th>
                                 <?php endforeach ?>
                             </tr>
                         </thead>
@@ -58,7 +58,10 @@
                                         </div>
                                     </td>
                                     <?php foreach (range(1, $days) as $day): ?>
-                                        <td <?php if($day == date('j') ): ?> style="background:#e1e1e1" <?php endif ?>  class="day day-<?php echo mktime(0,0,0, $month, $day, $year) ?>"></td>
+                                        <td <?php if(mktime(0,0,0, $month, $day, $year) == mktime(0,0,0) ): ?>
+                                                style="background:#e1e1e1"
+                                            <?php endif ?>  class="day day-<?php echo mktime(0,0,0, $month, $day, $year) ?>">
+                                        </td>
                                     <?php endforeach ?>
                                 </tr>
                             <?php endforeach ?>
