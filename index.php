@@ -8,9 +8,30 @@ $app = new Silex\Application(require_once __DIR__.'/config.php');
 
 require_once $app['libphutil_path'].'/libphutil/src/__phutil_library_init__.php';
 
-$_client = new ConduitClient($app['phabricator_url']);
-$_client->setConduitToken($app['api_token']);
+function call_conduit($method,  array $param) {
 
+    global $app;
+
+    $_client = new ConduitClient($app['phabricator_url']);
+    $_client->setConduitToken($app['api_token']);
+
+    $conduit = [
+        'method' => $method,
+        'param' => $param
+    ];
+
+    $hash = sha1(serialize($conduit));
+    $cache_file = $app['cache_dir'].'/'.$hash;
+
+    if(!file_exists($cache_file)) {
+        $data = $_client->callMethodSynchronous($conduit['method'], $conduit['param']);
+        file_put_contents($cache_file, serialize($data));
+    } else {
+        $data = unserialize(file_get_contents($cache_file));
+    }
+
+    return $data;
+}
 
 $_escaper = new Escaper;
 $_template = new Template(__DIR__.'/_tpl', $_escaper);
@@ -18,25 +39,41 @@ $_template = new Template(__DIR__.'/_tpl', $_escaper);
 /* HOME redirect to /{year}/{date} */
 $app->get('/',function() use ($app){
 
-    $url = $app['request']->getBaseUrl().'/'.date('Y').'/'.date('n');
-    return $app->redirect($url);
+    return 'coba /{username}';
 });
 
 /* MAIN */
-$app->get('/{year}/{month}', function($year, $month) use($app, $_client, $_template) {
+$app->get('/{username}', function($username) use($app, $_template) {
     
     $data['base_path'] = $app['request']->getBaseUrl();
 
-    $data['year'] = $year;
-    $data['month'] = $month;
+    $users = call_conduit('user.query', ['usernames' => [$username]]);
 
-    $data['users'] = $_client->callMethodSynchronous('user.query', []);
-    $data['days'] = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+    $user = $users[0];
+
+    $user['tasks'] = $tasks = call_conduit('maniphest.query', ['status' => 'status-open', 'ownerPHIDs' => [$user['phid']]]);
+
+    $categories = [];
+    $vals = [];
+
+    foreach ($tasks as $task_phid => $task) {
+        $start_working = $task['auxiliary']['std:maniphest:creasindo:start_working'];
+        $target = $task['auxiliary']['std:maniphest:creasindo:target'];
+
+        if($target && $start_working) {
+            $categories[] = 'T'.$task['id'];
+            $vals[] = [$start_working*1000, $target*1000];
+        }
+    }
+
+    $data['categories'] = $categories;
+    $data['data'] = $vals;
+
     return $_template->render('index', $data);
 });
 
 /* API to get json data */
-$app->get('/api', function() use ($app, $_client) {
+$app->get('/api', function() use ($app) {
 
     $users = $_client->callMethodSynchronous('user.query', []);
     $colors = ['#80E680', '#4D4DFF', '#E066A3', '#DB4D4D', '#FF944D', '#A38566', '#FFFF66'];

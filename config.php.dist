@@ -5,4 +5,5 @@
 	'api_token' => '',
 	'libphutil_path' => __DIR__.'/path/to/libphutil',
 	'phabricator_url' => '',
+	'cache_dir' => __DIR__.'/var/cache'
 ];

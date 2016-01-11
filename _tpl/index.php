@@ -22,68 +22,78 @@
             <div class="row">
                 <div class="col-md-12">
                     <h1>Tasks Assignment Diagram</h1>
-
-                    <ul>
-                        <li>Height of row indicates number of tasks.</li>
-                        <li> Different color of cells indicates different projects.</li>
-                        <li> Click cells to go to the task.</li>
-                    </ul>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th rowspan="2" class="user-col">User</th>
-                                <th colspan="<?= ($days+1) ?>"> <?php echo date('F Y', mktime(0,0,0, $month, 1, $year)) ?></th>
-                            </tr>
-                            <tr>
-                                <?php foreach (range(1, $days) as $day): ?>
-                                    <th style="width:30px;"><?= str_pad($day, 2, '0', STR_PAD_LEFT) ?></th>
-                                <?php endforeach ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($users as $user): ?>
-                                <tr id="row-<?= $user['phid'] ?>">
-                                    <td valign="top">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <img style="height:20px;" src="<?php echo $user['image'] ?>">
-                                            </div>
-                                            <div class="col-md-10">
-                                                <?= $user['realName'] ?>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <?php foreach (range(1, $days) as $day): ?>
-                                        <td <?php if(mktime(0,0,0, $month, $day, $year) == mktime(0,0,0) ): ?>
-                                                style="background:#e1e1e1"
-                                            <?php endif ?>  class="day day-<?php echo mktime(0,0,0, $month, $day, $year) ?>">
-                                        </td>
-                                    <?php endforeach ?>
-                                </tr>
-                            <?php endforeach ?>
-                        </tbody>
-                    </table>
+                    <div id="chart-container"></div>
                 </div>
             </div>
         </div>
             
         <script type="text/javascript" src="<?= $base_path ?>/assets/plugins/jquery/dist/jquery.js"></script>
         <script type="text/javascript" src="<?= $base_path ?>/assets/plugins/bootstrap/dist/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="<?= $base_path ?>/assets/js/app.js"></script>
+        <script type="text/javascript" src="<?= $base_path ?>/assets/plugins/highcharts/highcharts.js"></script>
+        <script type="text/javascript" src="<?= $base_path ?>/assets/plugins/highcharts/highcharts-more.js"></script>
         <script type="text/javascript">
+            $(function () {
 
-            var baseUrl = "<?= $base_path ?>";
+                $('#chart-container').highcharts({
 
-            var days = [];
-            <?php foreach (range(1, $days) as $day): ?>
-                days.push(<?= mktime(0,0,0, $month, $day, $year) ?>);
-            <?php endforeach ?>
+                    chart: {
+                        type: 'columnrange',
+                        inverted: true,
+                        zoomType: 'y'
+                    },
 
-            App.init(baseUrl, days);
+                    title: {
+                        text: 'Task'
+                    },
+
+                    xAxis: {
+                        categories: <?php echo json_encode($categories); ?>
+                    },
+
+                    yAxis: {
+                        title: {
+                            text: 'Waktu'
+                        },
+                        tipe: 'datetime',
+                        labels: {
+                            formatter: function() {
+                                var d = new Date(this.value);
+
+                                return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getMinutes();
+                            }
+                        },
+                    },
+
+                    tooltip: {
+                        formatter: function() {
+
+                            function format(time) {
+
+                                var d = new Date(time);
+                                return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getMinutes();
+                            }
+
+                            return this.x+' '+format(this.point.low)+' s/d '+format(this.point.low);
+                        }
+                    },
+
+                    legend: {
+                        enabled: false
+                    },
+
+                    series: [{
+                        name: 'Waktu',
+                        data: <?php echo json_encode($data); ?>,
+                        pointWidth: 20
+                    }]
+
+                });
+
+            });
         </script>
     </body>
 </html>
